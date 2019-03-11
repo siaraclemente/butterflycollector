@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>Butterfly List</h1>
+
+{% for butterfly in butterflies %}
+    <div class="card">
+        <div class="card-content">
+            <span class="card-title">{{ butterfly.name }}</span>
+            <p>Type: {{ butterfly.type }}</p>
+            <p>Description: {{ butterfly.description }}</p>
+            {% if butterfly.age > 0 %}
+                <p>Age: {{ butterfly.age }}</p>
+            {% else %}
+                <p>Age: Just Hatched</p>
+            {% endif %}
+        </div>
+    </div>
+{% endfor %}
+
+{% endblock %}
