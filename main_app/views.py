@@ -1,18 +1,5 @@
 from django.shortcuts import render
-
-class Butterfly:
-    def __init__(self, name, type, description, age):
-        self.name = name
-        self.type = type
-        self.description = description
-        self.age = age
-
-butterflies = [
-    Butterfly('Milbert', 'milbert’s tortoiseshell', 'outgoing little bugger', 3),
-    Butterfly('Lily', 'monarch', 'loves lillies', 0),
-    Butterfly('Blue', 'karner blue', 'old man', 4)
-]
-
+from .models import Butterfly
 
 # Create your views here.
 def home(request):
@@ -22,4 +9,9 @@ def about(request):
     return render(request, 'about.html')
 
 def butterflies_index(request):
+    butterflies = Butterfly.objects.all()
     return render(request, 'butterflies/index.html', { 'butterflies': butterflies })
+
+def butterflies_detail(request, butterfly_id):
+  butterfly = Butterfly.objects.get(id=butterfly_id)
+  return render(request, 'butterflies/detail.html', { 'butterfly': butterfly })
