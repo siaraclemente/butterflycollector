@@ -26,7 +26,7 @@
     <form action="{% url 'add_feeding' butterfly.id %}" method="post">
       {% csrf_token %}
       {{ feeding_form.as_p }}
-      <input type="submit" class="btn" value="Add Feeding">
+      <input type="submit" class="btn deep-purple accent-1" value="Add Feeding">
     </form>
     <br>
     {% if butterfly.fed_for_today %}
