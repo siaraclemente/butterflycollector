@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from .models import Butterfly
 
 # Create your views here.
@@ -15,3 +16,16 @@ def butterflies_index(request):
 def butterflies_detail(request, butterfly_id):
   butterfly = Butterfly.objects.get(id=butterfly_id)
   return render(request, 'butterflies/detail.html', { 'butterfly': butterfly })
+
+class ButterflyCreate(CreateView):
+  model = Butterfly
+  fields = '__all__'
+  success_url = '/butterflies/'
+
+class ButterflyUpdate(UpdateView):
+  model = Butterfly
+  fields = ['type', 'description', 'age']
+
+class ButterflyDelete(DeleteView):
+  model = Butterfly
+  success_url = '/butterflies/'

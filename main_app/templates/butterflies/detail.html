@@ -14,6 +14,10 @@
       <p>Age: Just Hatched</p>
     {% endif %}
   </div>
+  <div class="card-action">
+    <a href="{% url 'butterflies_update' butterfly.id %}">Edit</a>
+    <a href="{% url 'butterflies_delete' butterfly.id %}">Delete</a>
+  </div>
 </div>
 
 {% endblock %}
