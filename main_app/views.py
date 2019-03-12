@@ -1,6 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from .models import Butterfly
+from .forms import FeedingForm
 
 # Create your views here.
 def home(request):
@@ -15,7 +16,18 @@ def butterflies_index(request):
 
 def butterflies_detail(request, butterfly_id):
   butterfly = Butterfly.objects.get(id=butterfly_id)
-  return render(request, 'butterflies/detail.html', { 'butterfly': butterfly })
+  feeding_form = FeedingForm()
+  return render(request, 'butterflies/detail.html', { 
+    'butterfly': butterfly, 'feeding_form': feeding_form
+    })
+
+def add_feeding(request, butterfly_id):
+  form = FeedingForm(request.POST)
+  if form.is_valid():
+    new_feeding = form.save(commit=False)
+    new_feeding.butterfly_id = butterfly_id
+    new_feeding.save()
+  return redirect('detail', butterfly_id=butterfly_id)
 
 class ButterflyCreate(CreateView):
   model = Butterfly

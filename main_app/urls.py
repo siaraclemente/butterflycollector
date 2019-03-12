@@ -9,4 +9,5 @@ urlpatterns = [
    path('butterflies/create/', views.ButterflyCreate.as_view(), name='butterflies_create'),
    path('butterflies/<int:pk>/update/', views.ButterflyUpdate.as_view(), name='butterflies_update'),
    path('butterflies/<int:pk>/delete/', views.ButterflyDelete.as_view(), name='butterflies_delete'),
+   path('butterflies/<int:butterfly_id>/add_feeding/', views.add_feeding, name='add_feeding'),
 ]
