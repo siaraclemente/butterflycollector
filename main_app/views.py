@@ -1,9 +1,22 @@
 from django.shortcuts import render, redirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from .models import Butterfly
+from django.views.generic import ListView, DetailView
+from .models import Butterfly, Flower
 from .forms import FeedingForm
 
 # Create your views here.
+class ButterflyCreate(CreateView):
+  model = Butterfly
+  fields = '__all__'
+
+class ButterflyUpdate(UpdateView):
+  model = Butterfly
+  fields = ['type', 'description', 'age']
+
+class ButterflyDelete(DeleteView):
+  model = Butterfly
+  success_url = '/butterflies/'
+
 def home(request):
     return render(request, 'home.html')
 
@@ -29,15 +42,20 @@ def add_feeding(request, butterfly_id):
     new_feeding.save()
   return redirect('detail', butterfly_id=butterfly_id)
 
-class ButterflyCreate(CreateView):
-  model = Butterfly
+class FlowerList(ListView):
+  model = Flower
+
+class FlowerDetail(DetailView):
+  model = Flower
+
+class FlowerCreate(CreateView):
+  model = Flower
   fields = '__all__'
-  success_url = '/butterflies/'
 
-class ButterflyUpdate(UpdateView):
-  model = Butterfly
-  fields = ['type', 'description', 'age']
+class FlowerUpdate(UpdateView):
+  model = Flower
+  fields = ['name', 'color']
 
-class ButterflyDelete(DeleteView):
-  model = Butterfly
-  success_url = '/butterflies/'
+class FlowerDelete(DeleteView):
+  model = Flower
+  success_url = '/flowers/'  
