@@ -29,10 +29,12 @@ def butterflies_index(request):
 
 def butterflies_detail(request, butterfly_id):
   butterfly = Butterfly.objects.get(id=butterfly_id)
+  flowers_butterfly_doesnt_have = Flower.objects.exclude(id__in = butterfly.flowers.all().values_list('id'))
   feeding_form = FeedingForm()
   return render(request, 'butterflies/detail.html', { 
-    'butterfly': butterfly, 'feeding_form': feeding_form
-    })
+    'butterfly': butterfly, 'feeding_form': feeding_form,
+    'flowers': flowers_butterfly_doesnt_have
+  })
 
 def add_feeding(request, butterfly_id):
   form = FeedingForm(request.POST)
@@ -40,6 +42,14 @@ def add_feeding(request, butterfly_id):
     new_feeding = form.save(commit=False)
     new_feeding.butterfly_id = butterfly_id
     new_feeding.save()
+  return redirect('detail', butterfly_id=butterfly_id)
+
+def assoc_flower(request, butterfly_id, flower_id):
+  Butterfly.objects.get(id=butterfly_id).flowers.add(flower_id)
+  return redirect('detail', butterfly_id=butterfly_id)
+
+def unassoc_flower(request, butterfly_id, flower_id):
+  Butterfly.objects.get(id=butterfly_id).flowers.remove(flower_id)
   return redirect('detail', butterfly_id=butterfly_id)
 
 class FlowerList(ListView):
@@ -59,3 +69,5 @@ class FlowerUpdate(UpdateView):
 class FlowerDelete(DeleteView):
   model = Flower
   success_url = '/flowers/'  
+
+
