@@ -63,6 +63,12 @@
             </span>
           </div>
         </div>
+        <div class="card-action">
+          <form action="{% url 'unassoc_flower' butterfly.id flower.id %}" method="post">
+            {% csrf_token %}
+            <input type="submit" class="btn deep-purple accent-1" value="Delete">
+          </form>
+        </div>      
       {% endfor %}
     {% else %}
       <h5>No Flowers :(</h5>
