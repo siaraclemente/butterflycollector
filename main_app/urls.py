@@ -10,6 +10,7 @@ urlpatterns = [
    path('butterflies/<int:pk>/update/', views.ButterflyUpdate.as_view(), name='butterflies_update'),
    path('butterflies/<int:pk>/delete/', views.ButterflyDelete.as_view(), name='butterflies_delete'),
    path('butterflies/<int:butterfly_id>/add_feeding/', views.add_feeding, name='add_feeding'),
+   path('butterflies/<int:butterfly_id>/add_photo/', views.add_photo, name='add_photo'),
    path('butterflies/<int:butterfly_id>/assoc_flower/<int:flower_id>/', views.assoc_flower, name='assoc_flower'),
    path('butterflies/<int:butterfly_id>/unassoc_flower/<int:flower_id>/', views.unassoc_flower, name='unassoc_flower'),
    path('flowers/', views.FlowerList.as_view(), name='flowers_index'),

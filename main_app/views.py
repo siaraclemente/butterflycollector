@@ -1,13 +1,18 @@
 from django.shortcuts import render, redirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView, DetailView
-from .models import Butterfly, Flower
+from .models import Butterfly, Flower, Photo
 from .forms import FeedingForm
+import uuid
+import boto3
+
+S3_BASE_URL = 'https://s3-us-east-2.amazonaws.com/'
+BUCKET = 'butterflycollector'
 
 # Create your views here.
 class ButterflyCreate(CreateView):
   model = Butterfly
-  fields = '__all__'
+  fields = ['name', 'type', 'description', 'age']
 
 class ButterflyUpdate(UpdateView):
   model = Butterfly
@@ -44,6 +49,25 @@ def add_feeding(request, butterfly_id):
     new_feeding.save()
   return redirect('detail', butterfly_id=butterfly_id)
 
+def add_photo(request, butterfly_id):
+	# photo-file was the "name" attribute on the <input type="file">
+  photo_file = request.FILES.get('photo-file', None)
+  if photo_file:
+    s3 = boto3.client('s3')
+    # need a unique "key" for S3 / needs image file extension too
+    key = uuid.uuid4().hex[:6] + photo_file.name[photo_file.name.rfind('.'):]
+    # just in case something goes wrong
+    try:
+      s3.upload_fileobj(photo_file, BUCKET, key)
+      # build the full url string
+      url = f"{S3_BASE_URL}{BUCKET}/{key}"
+      # we can assign to butterfly_id or butterfly (if you have a butterfly object)
+      photo = Photo(url=url, butterfly_id=butterfly_id)
+      photo.save()
+    except:
+      print('An error occurred uploading file to S3')
+  return redirect('detail', butterfly_id=butterfly_id)
+
 def assoc_flower(request, butterfly_id, flower_id):
   Butterfly.objects.get(id=butterfly_id).flowers.add(flower_id)
   return redirect('detail', butterfly_id=butterfly_id)
@@ -68,6 +92,8 @@ class FlowerUpdate(UpdateView):
 
 class FlowerDelete(DeleteView):
   model = Flower
-  success_url = '/flowers/'  
+  success_url = '/flowers/'
+
+  
 
 
