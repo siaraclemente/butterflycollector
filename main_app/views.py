@@ -1,6 +1,10 @@
 from django.shortcuts import render, redirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView, DetailView
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Butterfly, Flower, Photo
 from .forms import FeedingForm
 import uuid
@@ -10,15 +14,18 @@ S3_BASE_URL = 'https://s3-us-east-2.amazonaws.com/'
 BUCKET = 'butterflycollector'
 
 # Create your views here.
-class ButterflyCreate(CreateView):
+class ButterflyCreate(LoginRequiredMixin, CreateView):
   model = Butterfly
   fields = ['name', 'type', 'description', 'age']
+  def form_valid(self, form):
+    form.instance.user = self.request.user
+    return super().form_valid(form)
 
-class ButterflyUpdate(UpdateView):
+class ButterflyUpdate(LoginRequiredMixin, UpdateView):
   model = Butterfly
   fields = ['type', 'description', 'age']
 
-class ButterflyDelete(DeleteView):
+class ButterflyDelete(LoginRequiredMixin, DeleteView):
   model = Butterfly
   success_url = '/butterflies/'
 
@@ -28,10 +35,12 @@ def home(request):
 def about(request):
     return render(request, 'about.html')
 
+@login_required
 def butterflies_index(request):
-    butterflies = Butterfly.objects.all()
+    butterflies = Butterfly.objects.filter(user=request.user)
     return render(request, 'butterflies/index.html', { 'butterflies': butterflies })
 
+@login_required
 def butterflies_detail(request, butterfly_id):
   butterfly = Butterfly.objects.get(id=butterfly_id)
   flowers_butterfly_doesnt_have = Flower.objects.exclude(id__in = butterfly.flowers.all().values_list('id'))
@@ -41,6 +50,7 @@ def butterflies_detail(request, butterfly_id):
     'flowers': flowers_butterfly_doesnt_have
   })
 
+@login_required
 def add_feeding(request, butterfly_id):
   form = FeedingForm(request.POST)
   if form.is_valid():
@@ -49,6 +59,7 @@ def add_feeding(request, butterfly_id):
     new_feeding.save()
   return redirect('detail', butterfly_id=butterfly_id)
 
+@login_required
 def add_photo(request, butterfly_id):
 	# photo-file was the "name" attribute on the <input type="file">
   photo_file = request.FILES.get('photo-file', None)
@@ -68,31 +79,47 @@ def add_photo(request, butterfly_id):
       print('An error occurred uploading file to S3')
   return redirect('detail', butterfly_id=butterfly_id)
 
+@login_required
 def assoc_flower(request, butterfly_id, flower_id):
   Butterfly.objects.get(id=butterfly_id).flowers.add(flower_id)
   return redirect('detail', butterfly_id=butterfly_id)
 
+@login_required
 def unassoc_flower(request, butterfly_id, flower_id):
   Butterfly.objects.get(id=butterfly_id).flowers.remove(flower_id)
   return redirect('detail', butterfly_id=butterfly_id)
 
-class FlowerList(ListView):
+class FlowerList(LoginRequiredMixin, ListView):
   model = Flower
 
-class FlowerDetail(DetailView):
+class FlowerDetail(LoginRequiredMixin, DetailView):
   model = Flower
 
-class FlowerCreate(CreateView):
+class FlowerCreate(LoginRequiredMixin, CreateView):
   model = Flower
   fields = '__all__'
 
-class FlowerUpdate(UpdateView):
+class FlowerUpdate(LoginRequiredMixin, UpdateView):
   model = Flower
   fields = ['name', 'color']
 
-class FlowerDelete(DeleteView):
+class FlowerDelete(LoginRequiredMixin, DeleteView):
   model = Flower
   success_url = '/flowers/'
+
+def signup(request):
+  error_message = ''
+  if request.method == 'POST':
+    form = UserCreationForm(request.POST)
+    if form.is_valid():
+      user = form.save()
+      login(request, user)
+      return redirect('index')
+    else:
+      error_message = 'Invalid credentials - try again'
+  form = UserCreationForm()
+  context = {'form': form, 'error_message': error_message}
+  return render(request, 'registration/signup.html', context)
 
   
 
